@@ -5,14 +5,21 @@ from rest_framework.views import APIView
 from rest_framework.viewsets import ViewSet,ModelViewSet,GenericViewSet
 from rest_framework.mixins import RetrieveModelMixin
 # Create your views here.
+from user.authentications import MyAuthentication
+from user.permissions import MyPermission
+from user.throttle import Mythrottle
 from user.models import User
 from user.serializer import UserModelSerializer
-from utils.MyResponse import MyResponse
-
+from utils.Response import MyResponse
+from rest_framework.authentication import BaseAuthentication
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from rest_framework.permissions import BasePermission,IsAuthenticated
+from utils.Response import MyResponse
 
 class UserAPIView(ModelViewSet):
 # class UserAPIView(GenericViewSet,RetrieveModelMixin):
     # queryset = User.objects.filter(id=1)
+    # authentication_classes = [MyAuthentication]
     queryset = User.objects.all()
     serializer_class = UserModelSerializer
     lookup_field = 'username'
@@ -37,4 +44,17 @@ class UserAPIView(ModelViewSet):
             return MyResponse(400, '用户名已存在')
         user_ser = self.create(request, *args, **kwargs)
         return MyResponse(200,'注册成功',results=user_ser.data)
+
+
+class QueryAPIView(APIView):
+    # authentication_classes = [MyAuthentication]
+    # permission_classes =  [IsAuthenticated]
+    # permission_classes =  [MyPermission]
+    throttle_classes = [Mythrottle]
+    def get(self,request,*args,**kwargs):
+        # print(22222)
+        # print(111111)
+        return Response('游客访问')
+    def post(self,request,*args,**kwargs):
+        return MyResponse('用户访问')
 
